@@ -23,6 +23,7 @@ app/release/
 app/debug/
 
 # Signing and local secrets
+secrets.properties
 *.jks
 *.keystore
 keystore.properties
@@ -36,4 +37,3 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
-

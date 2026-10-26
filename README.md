@@ -9,8 +9,13 @@ nutrition values to Android Health Connect.
 ### Setup
 
 1. Open the project in Android Studio with an Android SDK that includes API 35.
-2. Set `GEMINI_API_KEY` in `app/build.gradle.kts` (or replace the placeholder
-   through your build configuration). Do not commit a real key.
+2. Open the gitignored `secrets.properties` file at the project root and paste
+   your key:
+   ```properties
+   GEMINI_API_KEY=your-key-here
+   ```
+   Do not commit a real key. If the file is absent, the app builds with a
+   placeholder and reports a configuration error when a meal is submitted.
 3. Run the app on an Android 14+ device or emulator with Health Connect
    available, then grant the nutrition write permission when prompted.
 
