@@ -3,7 +3,7 @@
 ## Quick Calorie Logger
 
 This repository contains a single-screen Jetpack Compose Android app that sends a
-plaintext meal description to Gemini (`gemini-2.5-flash`) and writes the parsed
+plaintext meal description to Gemini (`gemini-3.8-flash`) and writes the parsed
 nutrition values to Android Health Connect.
 
 ### Setup
