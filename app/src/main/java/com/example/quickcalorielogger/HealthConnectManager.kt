@@ -3,6 +3,7 @@ package com.example.quickcalorielogger
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
@@ -47,9 +48,9 @@ class HealthConnectManager(context: Context) {
     }
 
     private fun String.toHealthConnectMealType(): Int = when (this) {
-        "MEAL_TYPE_BREAKFAST" -> NutritionRecord.MEAL_TYPE_BREAKFAST
-        "MEAL_TYPE_LUNCH" -> NutritionRecord.MEAL_TYPE_LUNCH
-        "MEAL_TYPE_DINNER" -> NutritionRecord.MEAL_TYPE_DINNER
-        else -> NutritionRecord.MEAL_TYPE_SNACK
+        "MEAL_TYPE_BREAKFAST" -> MealType.MEAL_TYPE_BREAKFAST
+        "MEAL_TYPE_LUNCH" -> MealType.MEAL_TYPE_LUNCH
+        "MEAL_TYPE_DINNER" -> MealType.MEAL_TYPE_DINNER
+        else -> MealType.MEAL_TYPE_SNACK
     }
 }

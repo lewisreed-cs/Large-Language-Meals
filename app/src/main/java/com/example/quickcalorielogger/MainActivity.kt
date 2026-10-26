@@ -25,7 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -67,7 +67,7 @@ private fun QuickCalorieLoggerScreen() {
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = HealthConnectClient.createRequestPermissionResultContract()
+        contract = PermissionController.createRequestPermissionResultContract()
     ) {
         pendingDescription?.let { processMeal(it) }
         pendingDescription = null

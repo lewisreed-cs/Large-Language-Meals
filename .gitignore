@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local Android SDK configuration
+local.properties
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Kotlin
+*.kotlin_module
+
+# Generated Android files
+captures/
+.externalNativeBuild/
+.cxx/
+app/release/
+app/debug/
+
+# Signing and local secrets
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor and tooling metadata
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
