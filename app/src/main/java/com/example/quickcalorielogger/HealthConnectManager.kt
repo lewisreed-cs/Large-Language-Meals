@@ -16,7 +16,8 @@ data class ParsedMeal(
     val calories: Double,
     val proteinGrams: Double,
     val carbGrams: Double,
-    val fatGrams: Double
+    val fatGrams: Double,
+    val startTime: Instant
 )
 
 class HealthConnectManager(context: Context) {
@@ -29,22 +30,23 @@ class HealthConnectManager(context: Context) {
     suspend fun hasNutritionPermission(): Boolean =
         client.permissionController.getGrantedPermissions().containsAll(requiredPermissions)
 
-    suspend fun logNutritionToHealthConnect(meal: ParsedMeal) {
-        val now = Instant.now()
-        val record = NutritionRecord(
-            metadata = Metadata.manualEntry(),
-            startTime = now,
-            endTime = now,
-            startZoneOffset = null,
-            endZoneOffset = null,
-            name = meal.mealName,
-            mealType = meal.mealType.toHealthConnectMealType(),
-            energy = Energy.kilocalories(meal.calories),
-            protein = Mass.grams(meal.proteinGrams),
-            totalCarbohydrate = Mass.grams(meal.carbGrams),
-            totalFat = Mass.grams(meal.fatGrams)
-        )
-        client.insertRecords(listOf(record))
+    suspend fun logNutritionToHealthConnect(meals: List<ParsedMeal>) {
+        val records = meals.map { meal ->
+            NutritionRecord(
+                metadata = Metadata.manualEntry(),
+                startTime = meal.startTime,
+                endTime = meal.startTime.plusSeconds(1),
+                startZoneOffset = null,
+                endZoneOffset = null,
+                name = meal.mealName,
+                mealType = meal.mealType.toHealthConnectMealType(),
+                energy = Energy.kilocalories(meal.calories),
+                protein = Mass.grams(meal.proteinGrams),
+                totalCarbohydrate = Mass.grams(meal.carbGrams),
+                totalFat = Mass.grams(meal.fatGrams)
+            )
+        }
+        client.insertRecords(records)
     }
 
     private fun String.toHealthConnectMealType(): Int = when (this) {
