@@ -12,10 +12,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 class GeminiRepository(
@@ -31,7 +28,7 @@ class GeminiRepository(
 ) {
     suspend fun parseMeals(
         description: String,
-        dateTimeHint: String,
+        mealDate: LocalDate,
         model: GeminiModel
     ): List<ParsedMeal> = withContext(Dispatchers.IO) {
         require(BuildConfig.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY") {
@@ -41,21 +38,20 @@ class GeminiRepository(
         val prompt = """
             Parse every meal in this plaintext description. The user may describe multiple
             meals, such as lunch and dinner, and each must be returned as a separate array item.
-            Resolve rough or relative dates and times using the date/time hint and current time.
+            Use the supplied meal date for every returned meal. Infer meal type from the
+            description (breakfast, lunch, dinner, snack, etc.); do not infer a different date.
             Reply strictly with a raw JSON array only (no Markdown backticks or extra text), using:
             [
               {
                 "mealName": "String",
                 "mealType": "MEAL_TYPE_BREAKFAST | MEAL_TYPE_LUNCH | MEAL_TYPE_DINNER | MEAL_TYPE_SNACK",
-                "mealDateTime": "ISO-8601 instant with timezone offset",
                 "calories": 0.0,
                 "proteinGrams": 0.0,
                 "carbGrams": 0.0,
                 "fatGrams": 0.0
               }
             ]
-            Current date/time: ${OffsetDateTime.now()}
-            User date/time hint: ${dateTimeHint.ifBlank { "Use the current date and infer times from the description." }}
+            Meal date: $mealDate
             Meal description: $description
         """.trimIndent()
 
@@ -64,7 +60,7 @@ class GeminiRepository(
             backticks or extra text. Use exactly these fields:
             mealName (string), mealType (one of MEAL_TYPE_BREAKFAST, MEAL_TYPE_LUNCH,
             MEAL_TYPE_DINNER, MEAL_TYPE_SNACK), calories (number), proteinGrams (number),
-            carbGrams (number), fatGrams (number), and mealDateTime (ISO-8601 timestamp).
+            carbGrams (number), and fatGrams (number).
             Return one array item per meal, never combine lunch and dinner into one item.
         """.trimIndent()
         val requestJson = JSONObject()
@@ -103,7 +99,7 @@ class GeminiRepository(
                         }
                         error("Gemini request failed (${response.code}): $detail")
                     }
-                    return@withContext parseResponse(responseBody)
+                    return@withContext parseResponse(responseBody, mealDate)
                 }
             } catch (error: IOException) {
                 lastFailure = error
@@ -115,7 +111,7 @@ class GeminiRepository(
         error("Gemini request timed out or could not connect: ${lastFailure?.message ?: "service unavailable"}")
     }
 
-    private fun parseResponse(responseBody: String): List<ParsedMeal> {
+    private fun parseResponse(responseBody: String, mealDate: LocalDate): List<ParsedMeal> {
         val text = JSONObject(responseBody)
             .getJSONArray("candidates").getJSONObject(0)
             .getJSONObject("content").getJSONArray("parts").getJSONObject(0)
@@ -131,16 +127,8 @@ class GeminiRepository(
                 proteinGrams = json.getDouble("proteinGrams"),
                 carbGrams = json.getDouble("carbGrams"),
                 fatGrams = json.getDouble("fatGrams"),
-                startTime = parseMealTime(json.getString("mealDateTime"))
+                mealDate = mealDate
             )
-        }
-    }
-
-    private fun parseMealTime(value: String): Instant {
-        return runCatching { Instant.parse(value) }.getOrElse {
-            runCatching { OffsetDateTime.parse(value).toInstant() }.getOrElse {
-                LocalDateTime.parse(value).atZone(ZoneId.systemDefault()).toInstant()
-            }
         }
     }
 }

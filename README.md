@@ -1,11 +1,12 @@
 # Large-Language-Meals
 
-## Quick Calorie Logger
+## Large Language Meals
 
-This repository contains a single-screen Jetpack Compose Android app that sends a
-plaintext meal description to a selectable Gemini model and writes the parsed
-nutrition values to Android Health Connect. A single request can contain multiple
-meals, such as lunch and dinner, and each is logged as a separate record.
+This repository contains a single-screen Jetpack Compose Android app called
+Large Language Meals. It sends plaintext meal descriptions to a selectable
+Gemini model and writes the parsed nutrition values to Android Health Connect.
+A single request can contain multiple meals, such as lunch and dinner, and each
+is logged as a separate record.
 
 ### Setup
 
@@ -23,10 +24,22 @@ meals, such as lunch and dinner, and each is logged as a separate record.
 ### Meal dates and multiple meals
 
 Choose a model from the model dropdown, then optionally provide a natural-language
-date/time hint such as `Today at 12:30 for lunch and 19:00 for dinner`. Describe
-both meals in the meal field. Gemini resolves each meal to an ISO-8601 timestamp,
-and the app writes each meal separately using that timestamp. If no hint is
-provided, Gemini uses the current date and inferred times.
+date with the date picker. Describe the meal type in the text, such as
+`Lunch: chicken salad. Dinner: salmon with rice.` The selected date is applied
+to every meal returned by Gemini, and the app writes each meal separately using
+that date. Health Connect receives a short midday interval because it requires
+both a start and end instant while the app intentionally does not collect a time.
+
+### Saved foods
+
+Use the **Saved foods** table below the meal description and its `+` button to
+save reusable foods with calories, protein, fat, and carbohydrate values. The
+table scrolls independently when it contains many rows. While typing a meal,
+enter `@` followed by a food name to see matching inline suggestions; the
+keyboard stays open and the suggestions narrow as you type. Selecting
+`@proteinwraps`, for example, inserts the token into the description; before
+Gemini receives the request, it expands to
+`protein wraps (100kcal, 10g protein, 2g fat, 20g carbs)`.
 
 The implementation is split between:
 

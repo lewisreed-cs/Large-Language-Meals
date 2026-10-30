@@ -8,7 +8,8 @@ import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Mass
-import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 data class ParsedMeal(
     val mealName: String,
@@ -17,7 +18,7 @@ data class ParsedMeal(
     val proteinGrams: Double,
     val carbGrams: Double,
     val fatGrams: Double,
-    val startTime: Instant
+    val mealDate: LocalDate
 )
 
 class HealthConnectManager(context: Context) {
@@ -34,8 +35,8 @@ class HealthConnectManager(context: Context) {
         val records = meals.map { meal ->
             NutritionRecord(
                 metadata = Metadata.manualEntry(),
-                startTime = meal.startTime,
-                endTime = meal.startTime.plusSeconds(1),
+                startTime = meal.mealDate.atTime(12, 0).atZone(ZoneId.systemDefault()).toInstant(),
+                endTime = meal.mealDate.atTime(12, 0, 1).atZone(ZoneId.systemDefault()).toInstant(),
                 startZoneOffset = null,
                 endZoneOffset = null,
                 name = meal.mealName,

@@ -4,9 +4,10 @@
 
     <application
         android:allowBackup="true"
-        android:label="Quick Calorie Logger"
+        android:icon="@drawable/robot_chef"
+        android:label="Large Language Meals"
         android:supportsRtl="true"
-        android:theme="@style/Theme.QuickCalorieLogger">
+        android:theme="@style/Theme.LargeLanguageMeals">
         <activity
             android:name=".MainActivity"
             android:exported="true">
