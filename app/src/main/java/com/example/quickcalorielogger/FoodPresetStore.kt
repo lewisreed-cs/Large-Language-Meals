@@ -9,7 +9,8 @@ data class FoodPreset(
     val calories: Double,
     val proteinGrams: Double,
     val fatGrams: Double,
-    val carbGrams: Double
+    val carbGrams: Double,
+    val color: Int
 ) {
     val token: String
         get() = "@${name.lowercase().replace(" ", "")}"
@@ -32,7 +33,8 @@ class FoodPresetStore(context: Context) {
                 calories = item.getDouble("calories"),
                 proteinGrams = item.getDouble("proteinGrams"),
                 fatGrams = item.getDouble("fatGrams"),
-                carbGrams = item.getDouble("carbGrams")
+                carbGrams = item.getDouble("carbGrams"),
+                color = item.optInt("color", FOOD_COLORS[index % FOOD_COLORS.size])
             )
         }
     }
@@ -47,11 +49,21 @@ class FoodPresetStore(context: Context) {
                     .put("proteinGrams", item.proteinGrams)
                     .put("fatGrams", item.fatGrams)
                     .put("carbGrams", item.carbGrams)
+                    .put("color", item.color)
             )
         }
         preferences.edit().putString("items", json.toString()).apply()
     }
 }
+
+val FOOD_COLORS = listOf(
+    0xFFE3F2FD.toInt(),
+    0xFFE8F5E9.toInt(),
+    0xFFFFF3E0.toInt(),
+    0xFFF3E5F5.toInt(),
+    0xFFFFEBEE.toInt(),
+    0xFFE0F7FA.toInt()
+)
 
 fun Double.formatNumber(): String =
     if (this % 1.0 == 0.0) toInt().toString() else "%.1f".format(this)

@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -41,7 +43,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.PermissionController
 import kotlinx.coroutines.launch
@@ -76,6 +83,9 @@ private fun LargeLanguageMealsScreen() {
     var modelMenuExpanded by remember { mutableStateOf(false) }
     var addFoodDialogOpen by remember { mutableStateOf(false) }
     var presets by remember { mutableStateOf(foodStore.load()) }
+    val foodHighlightTransformation = remember(presets) {
+        FoodHighlightTransformation(presets)
+    }
 
     val activeToken = description.text.substringAfterLast(" ").let { token ->
         if (token.startsWith("@")) token.lowercase() else ""
@@ -139,6 +149,7 @@ private fun LargeLanguageMealsScreen() {
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
+                    visualTransformation = foodHighlightTransformation,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Meal description") },
                     placeholder = { Text("Lunch: @proteinwraps and fruit") },
@@ -292,6 +303,13 @@ private fun SavedFoodsTable(
             ) {
                 items(presets) { preset ->
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .height(18.dp)
+                                .width(18.dp)
+                                .background(Color(preset.color))
+                        )
                         Text(preset.name, modifier = Modifier.weight(2f))
                         Text(preset.calories.formatNumber(), modifier = Modifier.weight(1f))
                         Text(preset.fatGrams.formatNumber(), modifier = Modifier.weight(1f))
@@ -336,7 +354,8 @@ private fun AddFoodDialog(
                     calories = calories.toDoubleOrNull() ?: 0.0,
                     proteinGrams = protein.toDoubleOrNull() ?: 0.0,
                     fatGrams = fat.toDoubleOrNull() ?: 0.0,
-                    carbGrams = carbs.toDoubleOrNull() ?: 0.0
+                    carbGrams = carbs.toDoubleOrNull() ?: 0.0,
+                    color = FOOD_COLORS[presets.size % FOOD_COLORS.size]
                 )
                 if (item.name.isNotBlank()) onSave((presets + item).distinctBy { it.token })
                 onDismiss()
@@ -344,4 +363,34 @@ private fun AddFoodDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Done") } }
     )
+}
+
+private class FoodHighlightTransformation(
+    private val presets: List<FoodPreset>
+) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val highlighted = AnnotatedString.Builder(text.text)
+        presets.forEach { preset ->
+            var start = text.text.indexOf(preset.token, ignoreCase = true)
+            while (start >= 0) {
+                highlighted.addStyle(
+                    SpanStyle(background = Color(preset.color).copy(alpha = 0.35f)),
+                    start,
+                    start + preset.token.length
+                )
+                start = text.text.indexOf(
+                    preset.token,
+                    startIndex = start + preset.token.length,
+                    ignoreCase = true
+                )
+            }
+        }
+        return TransformedText(
+            text = highlighted.toAnnotatedString(),
+            offsetMapping = object : androidx.compose.ui.text.input.OffsetMapping {
+                override fun originalToTransformed(offset: Int): Int = offset
+                override fun transformedToOriginal(offset: Int): Int = offset
+            }
+        )
+    }
 }

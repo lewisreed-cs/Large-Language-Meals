@@ -40,6 +40,8 @@ keyboard stays open and the suggestions narrow as you type. Selecting
 `@proteinwraps`, for example, inserts the token into the description; before
 Gemini receives the request, it expands to
 `protein wraps (100kcal, 10g protein, 2g fat, 20g carbs)`.
+Each saved food is assigned a persistent color, and matching `@food` tokens in
+the description receive a subtle background highlight in that color.
 
 The implementation is split between:
 
